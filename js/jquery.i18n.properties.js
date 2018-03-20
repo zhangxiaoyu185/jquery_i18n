@@ -99,7 +99,6 @@
         settings.filesLoaded = 0;
 
         files.forEach(function (file) {
-
             var defaultFileName, shortFileName, longFileName, fileNames;
             // 1. load base (eg, Messages.properties)
             defaultFileName = settings.path + file + '.properties';

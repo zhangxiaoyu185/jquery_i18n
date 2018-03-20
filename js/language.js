@@ -1,49 +1,4 @@
 /**
- * cookie操作
- */
-var getCookie = function(name, value, options) {
-    if (typeof value != 'undefined') { // name and value given, set cookie
-        options = options || {};
-        if (value === null) {
-            value = '';
-            options.expires = -1;
-        }
-        var expires = '';
-        if (options.expires && (typeof options.expires == 'number' || options.expires.toUTCString)) {
-            var date;
-            if (typeof options.expires == 'number') {
-                date = new Date();
-                date.setTime(date.getTime() + (options.expires * 24 * 60 * 60 * 1000));
-            } else {
-                date = options.expires;
-            }
-            expires = '; expires=' + date.toUTCString(); // use expires attribute, max-age is not supported by IE
-        }
-        var path = options.path ? '; path=' + options.path : '';
-        var domain = options.domain ? '; domain=' + options.domain : '';
-        var s = [cookie, expires, path, domain, secure].join('');
-        var secure = options.secure ? '; secure' : '';
-        var c = [name, '=', encodeURIComponent(value)].join('');
-        var cookie = [c, expires, path, domain, secure].join('')
-        document.cookie = cookie;
-    } else { // only name given, get cookie
-        var cookieValue = null;
-        if (document.cookie && document.cookie != '') {
-            var cookies = document.cookie.split(';');
-            for (var i = 0; i < cookies.length; i++) {
-                var cookie = jQuery.trim(cookies[i]);
-                // Does this cookie string begin with the name we want?
-                if (cookie.substring(0, name.length + 1) == (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-};
-
-/**
  * 获取浏览器语言类型
  * @return {string} 浏览器国家语言
  */
@@ -83,8 +38,8 @@ var execI18n = function(){
     /*
     首先获取用户浏览器设备之前选择过的语言类型
      */
-    if (getCookie("userLanguage")) {
-        i18nLanguage = getCookie("userLanguage");
+    if ($.cookie("userLanguage")) {
+        i18nLanguage = $.cookie("userLanguage");
     } else {
         // 获取浏览器语言
         var navLanguage = getNavLanguage();
@@ -94,7 +49,9 @@ var execI18n = function(){
             if (charSize > -1) {
                 i18nLanguage = navLanguage;
                 // 存到缓存中
-                getCookie("userLanguage",navLanguage);
+                $.cookie("userLanguage",navLanguage,{
+                    expires:30
+                });
             }
         } else{
             console.log("not navigator");
@@ -108,7 +65,7 @@ var execI18n = function(){
     }
 
     /*
-    这里需要进行i18n的翻译
+     * i18n翻译
      */
     jQuery.i18n.properties({
         name : sourceName, //资源文件名称
@@ -117,7 +74,6 @@ var execI18n = function(){
         language : i18nLanguage,
         callback : function() {//加载成功后设置显示内容
             var insertEle = $(".i18n");
-
             insertEle.each(function() {
                 // 根据i18n元素的 name 获取内容写入
                 $(this).html($.i18n.prop($(this).attr('name')));
@@ -135,7 +91,6 @@ var execI18n = function(){
     });
 }
 
-/*页面执行加载执行*/
 $(function(){
 
     /*执行I18n翻译*/
@@ -146,10 +101,9 @@ $(function(){
 
     /* 选择语言 */
     $("#language").bind('change', function() {
-        var language = $(this).children('option:selected').val()
-        getCookie("userLanguage",language,{
-            expires: 30,
-            path:'/i18n'
+        var language = $(this).children('option:selected').val();
+        $.cookie("userLanguage",language,{
+            expires:30
         });
         location.reload();
     });
